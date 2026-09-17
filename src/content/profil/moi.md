@@ -5,7 +5,6 @@ accroche: "Je transforme des équipes intimidées par la technologie en équipes
 anneesExperience: "15+ ans"
 email: "formationdampb@outlook.com"
 linkedin: "https://www.linkedin.com/in/priscilladambreville/"
-x: "https://x.com/"
 cvUrl: "/cv"
 competences:
   - categorie: "Suite Microsoft Office"
