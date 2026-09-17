@@ -1,0 +1,97 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection, getEntry } from 'astro:content';
+
+const profilEntry = await getEntry('profil', 'moi');
+const profil = profilEntry.data;
+
+const experiencesToutes = await getCollection('experiences', ({ data }) => data.publie !== false);
+const experiences = await Promise.all(
+  experiencesToutes
+    .sort((a, b) => (a.data.ordre ?? 99) - (b.data.ordre ?? 99))
+    .map(async (e) => ({ ...e, Content: (await e.render()).Content }))
+);
+---
+<Base titre={`CV — ${profil.nom}`} description={`CV complet de ${profil.nom}, ${profil.titre}`}>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-name">{profil.nom}</a>
+      <div class="nav-links">
+        <a href="/#apropos">À propos</a>
+        <a href="/#experience">Expérience</a>
+        <a href="/#competences">Compétences</a>
+        <a href="/#temoignages">Témoignages</a>
+      </div>
+      <a href="/#contact" class="nav-cta">Me contacter</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <div class="cv-header">
+      <div>
+        <h1>{profil.nom}</h1>
+        <div class="role">{profil.titre}</div>
+        <div class="contact-line">
+          <a href={`mailto:${profil.email}`}>{profil.email}</a>
+          {profil.linkedin && <> · <a href={profil.linkedin}>LinkedIn</a></>}
+        </div>
+      </div>
+      <div class="cv-actions">
+        <button class="btn btn-ghost" onclick="window.print()" type="button">Enregistrer en PDF</button>
+        <a class="btn btn-ghost" href="/">Retour au site</a>
+      </div>
+    </div>
+
+    <div class="cv-section">
+      <h2>Profil</h2>
+      <div class="about-text">
+        <p>{profil.accroche}</p>
+      </div>
+    </div>
+
+    <div class="cv-section">
+      <h2>Expérience professionnelle</h2>
+      <div class="timeline">
+        {experiences.map(({ data, Content }) => (
+          <div class="exp-block">
+            <h3 class="exp-employeur">{data.employeur}</h3>
+            <div class="exp-meta">{data.poste}<span class="sep">·</span>{data.periode}</div>
+            <div class="exp-body">
+              <Content />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="cv-section">
+      <h2>Compétences</h2>
+      <div class="skills-grid">
+        {profil.competences.map((groupe) => (
+          <div class="skill-card">
+            <h3>{groupe.categorie}</h3>
+            <div class="pill-row">
+              {groupe.items.map((item) => <span class="pill">{item}</span>)}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="cv-section">
+      <h2>Langues</h2>
+      <div class="langues-row">
+        {profil.langues.map((l) => (
+          <div class="langue-item">
+            <div class="nom">{l.nom}</div>
+            <div class="niveau">{l.niveau}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p>&copy; {new Date().getFullYear()} {profil.nom}. Tous droits réservés.</p>
+  </footer>
+</Base>

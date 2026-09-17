@@ -1,0 +1,154 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection, getEntry } from 'astro:content';
+
+const profilEntry = await getEntry('profil', 'moi');
+const { Content: APropos } = await profilEntry.render();
+const profil = profilEntry.data;
+
+const experiencesToutes = await getCollection('experiences', ({ data }) => data.publie !== false);
+const experiences = await Promise.all(
+  experiencesToutes
+    .sort((a, b) => (a.data.ordre ?? 99) - (b.data.ordre ?? 99))
+    .map(async (e) => ({ ...e, Content: (await e.render()).Content }))
+);
+
+const temoignagesToutes = await getCollection('temoignages', ({ data }) => data.publie !== false);
+const temoignages = await Promise.all(
+  temoignagesToutes
+    .sort((a, b) => (a.data.ordre ?? 99) - (b.data.ordre ?? 99))
+    .map(async (t) => ({ ...t, Content: (await t.render()).Content }))
+);
+---
+<Base titre={`${profil.nom} — ${profil.titre}`} description={profil.accroche}>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-name">{profil.nom}</a>
+      <div class="nav-links">
+        <a href="#apropos">À propos</a>
+        <a href="#experience">Expérience</a>
+        <a href="#competences">Compétences</a>
+        <a href="#temoignages">Témoignages</a>
+        {profil.cvUrl && <a href={profil.cvUrl}>CV complet</a>}
+      </div>
+      <a href="#contact" class="nav-cta">Me contacter</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <div class="hero-kicker">Formation & accompagnement technologique</div>
+        <h1>{profil.accroche}</h1>
+        <p class="role">{profil.titre}</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#contact">Me contacter</a>
+          {profil.cvUrl && <a class="btn btn-ghost" href={profil.cvUrl}>Voir le CV complet</a>}
+        </div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">{profil.anneesExperience}</div>
+        <div class="label">d'expérience en formation et technologie</div>
+      </div>
+    </section>
+  </div>
+
+  <section id="apropos">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker">Qui suis-je</div>
+        <h2>À propos</h2>
+      </div>
+      <div class="about-text">
+        <APropos />
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker">Parcours</div>
+        <h2>Expérience professionnelle</h2>
+      </div>
+      <div class="timeline">
+        {experiences.map(({ data, Content }) => (
+          <div class="exp-block">
+            <h3 class="exp-employeur">{data.employeur}</h3>
+            <div class="exp-meta">{data.poste}<span class="sep">·</span>{data.periode}</div>
+            <div class="exp-body">
+              <Content />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section id="competences">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker">Boîte à outils</div>
+        <h2>Compétences</h2>
+      </div>
+      <div class="skills-grid">
+        {profil.competences.map((groupe) => (
+          <div class="skill-card">
+            <h3>{groupe.categorie}</h3>
+            <div class="pill-row">
+              {groupe.items.map((item) => <span class="pill">{item}</span>)}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="section-head" style="margin-top: 2.5rem;">
+        <div class="section-kicker">Communication</div>
+        <h2>Langues</h2>
+      </div>
+      <div class="langues-row">
+        {profil.langues.map((l) => (
+          <div class="langue-item">
+            <div class="nom">{l.nom}</div>
+            <div class="niveau">{l.niveau}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section id="temoignages" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker">Ce qu'on en dit</div>
+        <h2>Témoignages</h2>
+      </div>
+      <div class="temoignages-grid">
+        {temoignages.map(({ data, Content }) => (
+          <div class="temoignage-card">
+            <div class="stars">{'★'.repeat(data.note)}{'☆'.repeat(5 - data.note)}</div>
+            <blockquote><Content /></blockquote>
+            <div class="auteur">— {data.nom}{data.role ? `, ${data.role}` : ''}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="contact-band">
+        <h2>Discutons de votre prochain projet de formation</h2>
+        <p>Que ce soit pour vos équipes ou pour vous-même, je peux vous aider à tirer le meilleur des outils Microsoft et de l'IA.</p>
+        <div class="contact-links">
+          <a class="btn btn-primary" href={`mailto:${profil.email}`}>{profil.email}</a>
+          {profil.linkedin && <a class="btn btn-ghost" style="border-color:#cfc9be;color:#f2ece1;" href={profil.linkedin}>LinkedIn</a>}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <p>&copy; {new Date().getFullYear()} {profil.nom}. Tous droits réservés.</p>
+  </footer>
+</Base>
