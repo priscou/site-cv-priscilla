@@ -4,7 +4,7 @@ titre: "Formatrice & consultante en technologies — Suite Microsoft & IA"
 accroche: "Je transforme des équipes intimidées par la technologie en équipes autonomes et efficaces."
 anneesExperience: "15+ ans"
 email: "formationdampb@outlook.com"
-linkedin: "https://www.linkedin.com/"
+linkedin: "https://www.linkedin.com/in/priscilladambreville/"
 x: "https://x.com/"
 cvUrl: "/cv"
 competences:
